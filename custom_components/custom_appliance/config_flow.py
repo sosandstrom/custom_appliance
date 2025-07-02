@@ -24,9 +24,7 @@ class BlueprintFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     @staticmethod
-    def async_get_options_flow(
-        config_entry: config_entries.ConfigEntry,
-    ) -> OptionsFlowHandler:
+    def async_get_options_flow() -> OptionsFlowHandler:
         """Return the options flow handler."""
         return OptionsFlowHandler()
 
