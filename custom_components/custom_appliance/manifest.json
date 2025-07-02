@@ -1,0 +1,13 @@
+{
+  "domain": "custom_appliance",
+  "name": "Custom Appliance",
+  "codeowners": [
+    "@sosandstrom"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/sosandstrom/custom_appliance",
+  "integration_type": "hub",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/sosandstrom/custom_appliance/issues",
+  "version": "0.1.0"
+}
