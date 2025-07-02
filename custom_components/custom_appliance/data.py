@@ -9,17 +9,29 @@ if TYPE_CHECKING:
     from homeassistant.config_entries import ConfigEntry
     from homeassistant.loader import Integration
 
-    from .api import IntegrationBlueprintApiClient
-    from .coordinator import BlueprintDataUpdateCoordinator
+    from .coordinator import ApplianceDataUpdateCoordinator
 
 
-type IntegrationBlueprintConfigEntry = ConfigEntry[IntegrationBlueprintData]
+type CustomApplianceConfigEntry = ConfigEntry[CustomApplianceData]
 
 
 @dataclass
-class IntegrationBlueprintData:
-    """Data for the Blueprint integration."""
+class ApplianceConfig:
+    """Configuration for a single appliance."""
 
-    client: IntegrationBlueprintApiClient
-    coordinator: BlueprintDataUpdateCoordinator
+    name: str
+    power_sensor_entity_id: str
+    area_id: str | None
+    off_threshold: float
+    running_threshold: float
+    debounce_time: int
+    complete_timeout: int
+
+
+@dataclass
+class CustomApplianceData:
+    """Data for the Custom Appliance integration."""
+
+    appliances: dict[str, ApplianceConfig]
+    coordinator: ApplianceDataUpdateCoordinator
     integration: Integration

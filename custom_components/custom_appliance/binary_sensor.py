@@ -10,52 +10,71 @@ from homeassistant.components.binary_sensor import (
     BinarySensorEntityDescription,
 )
 
-from .entity import IntegrationBlueprintEntity
+from .entity import CustomApplianceEntity
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-    from .coordinator import BlueprintDataUpdateCoordinator
-    from .data import IntegrationBlueprintConfigEntry
+    from .coordinator import ApplianceDataUpdateCoordinator
+    from .data import CustomApplianceConfigEntry
 
-ENTITY_DESCRIPTIONS = (
+
+BINARY_SENSOR_DESCRIPTIONS = (
     BinarySensorEntityDescription(
-        key="custom_appliance",
-        name="Custom Appliance Binary Sensor",
-        device_class=BinarySensorDeviceClass.CONNECTIVITY,
+        key="is_running",
+        name="Running",
+        device_class=BinarySensorDeviceClass.RUNNING,
+        icon="mdi:play",
+    ),
+    BinarySensorEntityDescription(
+        key="is_complete",
+        name="Complete",
+        icon="mdi:check-circle",
     ),
 )
 
 
 async def async_setup_entry(
     hass: HomeAssistant,  # noqa: ARG001 Unused function argument: `hass`
-    entry: IntegrationBlueprintConfigEntry,
+    entry: CustomApplianceConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the binary_sensor platform."""
-    async_add_entities(
-        IntegrationBlueprintBinarySensor(
-            coordinator=entry.runtime_data.coordinator,
-            entity_description=entity_description,
-        )
-        for entity_description in ENTITY_DESCRIPTIONS
-    )
+    """Set up the binary sensor platform."""
+    coordinator = entry.runtime_data.coordinator
+
+    entities = []
+    for appliance_id in coordinator.get_appliance_ids():
+        for description in BINARY_SENSOR_DESCRIPTIONS:
+            entities.append(
+                CustomApplianceBinarySensor(
+                    coordinator=coordinator,
+                    appliance_id=appliance_id,
+                    entity_description=description,
+                )
+            )
+
+    async_add_entities(entities)
 
 
-class IntegrationBlueprintBinarySensor(IntegrationBlueprintEntity, BinarySensorEntity):
-    """custom_appliance binary_sensor class."""
+class CustomApplianceBinarySensor(CustomApplianceEntity, BinarySensorEntity):
+    """Custom appliance binary sensor class."""
 
     def __init__(
         self,
-        coordinator: BlueprintDataUpdateCoordinator,
+        coordinator: ApplianceDataUpdateCoordinator,
+        appliance_id: str,
         entity_description: BinarySensorEntityDescription,
     ) -> None:
-        """Initialize the binary_sensor class."""
-        super().__init__(coordinator)
+        """Initialize the binary sensor class."""
+        super().__init__(coordinator, appliance_id, entity_description.key)
         self.entity_description = entity_description
+        self._attr_name = entity_description.name
 
     @property
-    def is_on(self) -> bool:
-        """Return true if the binary_sensor is on."""
-        return self.coordinator.data.get("title", "") == "foo"
+    def is_on(self) -> bool | None:
+        """Return true if the binary sensor is on."""
+        if not self.appliance_data:
+            return None
+
+        return self.appliance_data.get(self.entity_description.key, False)
