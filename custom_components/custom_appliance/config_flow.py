@@ -8,9 +8,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
-from homeassistant.helpers import device_registry as dr
-from homeassistant.helpers import entity_registry as er
-from homeassistant.helpers import selector
+from homeassistant.helpers import area_registry as ar, entity_registry as er, selector
 
 from .const import DOMAIN
 
@@ -57,10 +55,10 @@ class CustomApplianceConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         ]
 
         # Get available areas
-        device_registry = dr.async_get(self.hass)
+        area_registry = ar.async_get(self.hass)
         areas = [
             {"value": area.id, "label": area.name}
-            for area in device_registry.areas.values()
+            for area in area_registry.areas.values()
         ]
 
         return self.async_show_form(
@@ -302,10 +300,10 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
         ]
 
         # Get available areas
-        device_registry = dr.async_get(self.hass)
+        area_registry = ar.async_get(self.hass)
         areas = [
             {"value": area.id, "label": area.name}
-            for area in device_registry.areas.values()
+            for area in area_registry.areas.values()
         ]
 
         return vol.Schema(
